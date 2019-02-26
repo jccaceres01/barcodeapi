@@ -13,6 +13,7 @@ class OutputsController extends Controller
    */
   public function getOutputs() {
     return \DB::table('SOCOCO.DOCUMENTO_INV')->where('CONSECUTIVO', 'SALIDA')
+      ->where('PAQUETE_INVENTARIO', 'SAL')
       ->whereNull('APROBADO')
       ->get();
   }
