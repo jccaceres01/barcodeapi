@@ -76,14 +76,13 @@ class OutputsController extends Controller
   public function createLine(Request $request) {
     $lineNumber = \DB::table('SOCOCO.LINEA_DOC_INV')->max('LINEA_DOC_INV') + 1;
     $data = [
-      'PAQUETE_INVENTARIO' => $request->paquete_inventario,
+      'PAQUETE_INVENTARIO' => 'SAL',
       'DOCUMENTO_INV' => $request->documento_inv,
       'ARTICULO' => $request->articulo,
       'BODEGA' => $request->bodega,
       'LOCALIZACION' => $request->localizacion,
       'CANTIDAD' => $request->cantidad,
       'LINEA_DOC_INV' => $lineNumber,
-      'CANTIDAD' => $request->cantidad,
       'AJUSTE_CONFIG' => '~CC~',
       'NIT' => '130412618',
       'TIPO' => 'C',
