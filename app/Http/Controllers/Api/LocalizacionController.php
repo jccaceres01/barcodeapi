@@ -26,6 +26,9 @@ class LocalizacionController extends Controller
    * Get Locations from a storage
    */
   public function getLocationFromStorage($bodega) {
-    return \DB::table('SOCOCO.LOCALIZACION')->where('BODEGA', $bodega)->get();
+    return \DB::table('SOCOCO.LOCALIZACION')
+      ->where('BODEGA', $bodega)
+      ->orderBy('BODEGA', 'DESC')
+      ->get();
   }
 }

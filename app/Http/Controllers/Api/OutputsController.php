@@ -124,8 +124,8 @@ class OutputsController extends Controller
   /**
    * Find by Barcode
    */
-    public function lookupBybarcode($barcode) {
-      return Articulos::where('CODIGO_BARRAS_VENT', $barcode)->get();
+    public function lookupBybarcode(Request $request) {
+      return Articulos::where('CODIGO_BARRAS_VENT', $request->barcode)->get();
       //return Articulo::where('CODIGO_BARRAS_VENT', $barcode)->first();
   }
 }
