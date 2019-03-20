@@ -74,7 +74,11 @@ class OutputsController extends Controller
    * Create new output line
    */
   public function createLine(Request $request) {
-    $lineNumber = \DB::table('SOCOCO.LINEA_DOC_INV')->max('LINEA_DOC_INV') + 1;
+    $lineNumber = \DB::table('SOCOCO.LINEA_DOC_INV')
+      ->where('PAQUETE_INVENTARIO', 'SAL')
+      ->where('DOCUMENTO_INV', $request->documento_inv)
+      ->max('LINEA_DOC_INV') + 1;
+
     $data = [
       'PAQUETE_INVENTARIO' => 'SAL',
       'DOCUMENTO_INV' => $request->documento_inv,
