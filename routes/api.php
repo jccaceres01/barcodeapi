@@ -38,8 +38,8 @@ Route::get('outputlines/{documento_inv}',
   'Api\OutputsController@getOutputsLines'); // Get output Lines of a output
 Route::post('outputline',
   'Api\OutputsController@createLine'); // Create a new Line for a output
-Route::delete('outputlines/{documento_inv}/{linea_doc_inv}',
-  'Api\OutPutsController@delOutputsLines'); // Delete output line
+// Delete output line
+Route::delete('outputlines', 'Api\OutPutsController@delOutputsLines');
 
 /**
  * Routes for LOCALIZACION

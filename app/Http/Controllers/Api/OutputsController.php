@@ -107,25 +107,198 @@ class OutputsController extends Controller
       'COSTO_TOTAL_DOLAR_COMP' => 0
     ];
 
-    return response()->json(\DB::table('SOCOCO.LINEA_DOC_INV')->insert($data));
+    // Find existencia lote
+    $existenciaLote = \DB::table('SOCOCO.EXISTENCIA_LOTE')
+      ->where('ARTICULO', $request->articulo)
+      ->where('BODEGA', $request->bodega)
+      ->where('LOCALIZACION', $request->localizacion)
+      ->where('LOTE', 'ND')->first();
+    //  Find existencia bodega
+    $existenciaBodega = \DB::table('SOCOCO.EXISTENCIA_BODEGA')
+      ->where('ARTICULO', $request->articulo)
+      ->where('BODEGA', $request->bodega)->first();
+
+    if ($request->cantidad <= $existenciaLote->CANT_DISPONIBLE) {
+      \DB::beginTransaction();
+      try {
+        // Update ExistenciaLote
+        \DB::table('SOCOCO.EXISTENCIA_LOTE')
+          ->where('ARTICULO',  $request->articulo)
+          ->where('LOTE', 'ND')->where('LOCALIZACION', $request->localizacion)
+          ->where('BODEGA', $request->bodega)
+          ->update([
+            'CANT_DISPONIBLE' =>
+              $existenciaLote->CANT_DISPONIBLE - $request->cantidad,
+            'CANT_RESERVADA' =>
+              $existenciaLote->CANT_RESERVADA + $request->cantidad
+          ]);
+
+        // Update Existencia Bodega
+        \DB::table('SOCOCO.EXISTENCIA_BODEGA')
+          ->where('BODEGA', $request->bodega)
+          ->where('ARTICULO', $request->articulo)
+          ->update([
+            'CANT_DISPONIBLE' =>
+              $existenciaBodega->CANT_DISPONIBLE - $request->cantidad,
+            'CANT_RESERVADA' =>
+              $existenciaLote->CANT_RESERVADA + $request->cantidad
+          ]);
+
+        // Create or update existencia reserva
+        if (( $existenciaReserva = \DB::table('SOCOCO.EXISTENCIA_RESERVA')
+          ->where('ARTICULO', $request->articulo)
+          ->where('APLICACION', $request->documento_inv)
+          ->where('BODEGA', $request->bodega)
+          ->where('LOTE', 'ND')
+          ->where('LOCALIZACION', $request->localizacion)
+          ->first()) == true) {
+            \DB::table('SOCOCO.EXISTENCIA_RESERVA')
+              ->where('ARTICULO', $request->articulo)
+              ->where('APLICACION', $request->documento_inv)
+              ->where('BODEGA', $request->bodega)
+              ->where('LOTE', 'ND')
+              ->where('LOCALIZACION', $request->localizacion)
+              ->update([
+                'CANTIDAD' => $existenciaReserva->CANTIDAD + $request->cantidad
+              ]);
+        } else {
+          \DB::table('SOCOCO.EXISTENCIA_RESERVA')->insert([
+            'ARTICULO' => $request->articulo,
+            'APLICACION' => $request->documento_inv,
+            'BODEGA' => $request->bodega,
+            'LOTE' => 'ND',
+            'LOCALIZACION' => $request->localizacion,
+            'MODULO_ORIGEN' => 'CI',
+            'CANTIDAD' => $request->cantidad,
+            'USUARIO' => 'SA',
+            'FECHA_HORA' => new \DateTime('now')
+          ]);
+        }
+        //  Insert new lines for documento_inv
+        \DB::table('SOCOCO.LINEA_DOC_INV')->insert($data);
+
+        \DB::commit();
+        return response()->json('inserted');
+      } catch (\Exception $e) {
+        switch ($e->getCode()) {
+          default:
+            \DB::rollback();
+            \Log::info($e);
+            abort(500);
+        }
+      }
+    } else {
+      // the quantity is more than the existence
+      return response()->json('exceeded');
+    }
   }
 
   /**
    * Delete outputs Lines
    */
-  public function delOutputsLines($documento_inv, $linea_doc_inv) {
-    return \DB::table('SOCOCO.LINEA_DOC_INV')
-      ->where('PAQUETE_INVENTARIO', 'SAL')
-      ->where('DOCUMENTO_INV', $documento_inv)
-      ->where('LINEA_DOC_INV', $linea_doc_inv)
-      ->delete();
+    public function delOutputsLines(Request $request) {
+
+    $existenciaLote = null;
+    $existenciaBodega = null;
+    $existenciaReserva = null;
+
+    // Find existencia lote
+    if (($existenciaLote = \DB::table('SOCOCO.EXISTENCIA_LOTE')
+      ->where('ARTICULO', $request->articulo)
+      ->where('BODEGA', $request->bodega)
+      ->where('LOCALIZACION', $request->localizacion)
+      ->where('LOTE', 'ND')->first()) != true) {
+        return response()->json('noExistsLote');
+      }
+
+    //  Find existencia bodega
+    if (($existenciaBodega = \DB::table('SOCOCO.EXISTENCIA_BODEGA')
+      ->where('ARTICULO', $request->articulo)
+      ->where('BODEGA', $request->bodega)->first()) != true) {
+        return response()->json('noExistsBodega');
+      }
+
+    // Find existencia reserva
+    if (($existenciaReserva = \DB::table('SOCOCO.EXISTENCIA_RESERVA')
+      ->where('ARTICULO', $request->articulo)
+      ->where('APLICACION', $request->documento_inv)
+      ->where('BODEGA', $request->bodega)
+      ->where('LOTE', 'ND')
+      ->where('LOCALIZACION', $request->localizacion)->first()) != true) {
+        return response()->json('noExistsReserva');
+      }
+
+    \DB::beginTransaction();
+    try {
+      // Update existencia lote
+      \DB::table('SOCOCO.EXISTENCIA_LOTE')
+        ->where('ARTICULO', $request->articulo)
+        ->where('BODEGA', $request->bodega)
+        ->where('LOCALIZACION', $request->localizacion)
+        ->where('LOTE', 'ND')
+        ->update([
+          'CANT_DISPONIBLE' =>
+            $existenciaLote->CANT_DISPONIBLE + $request->cantidad,
+          'CANT_RESERVADA' =>
+            $existenciaLote->CANT_RESERVADA - $request->cantidad
+        ]);
+
+      // Update existencia bodega
+      \DB::table('SOCOCO.EXISTENCIA_BODEGA')
+        ->where('ARTICULO', $request->articulo)
+        ->where('BODEGA', $request->bodega)
+        ->update([
+          'CANT_DISPONIBLE' =>
+            $existenciaLote->CANT_DISPONIBLE + $request->cantidad,
+          'CANT_RESERVADA' =>
+            $existenciaLote->CANT_RESERVADA - $request->cantidad
+        ]);
+
+      if (($existenciaReserva->CANTIDAD - $request->cantidad) == 0) {
+        \DB::table('SOCOCO.EXISTENCIA_RESERVA')
+          ->where('ARTICULO', $request->articulo)
+          ->where('APLICACION', $request->documento_inv)
+          ->where('BODEGA', $request->bodega)
+          ->where('LOTE', 'ND')
+          ->where('LOCALIZACION', $request->localizacion)->delete();
+      } else {
+        \DB::table('SOCOCO.EXISTENCIA_RESERVA')
+          ->where('ARTICULO', $request->articulo)
+          ->where('APLICACION', $request->documento_inv)
+          ->where('BODEGA', $request->bodega)
+          ->where('LOTE', 'ND')
+          ->where('LOCALIZACION', $request->localizacion)
+          ->update([
+            'CANTIDAD' => $existenciaReserva->CANTIDAD - $request->cantidad
+          ]);
+      }
+      // Delete Line
+      \DB::table('SOCOCO.LINEA_DOC_INV')
+        ->where('PAQUETE_INVENTARIO', 'SAL')
+        ->where('DOCUMENTO_INV', $request->documento_inv)
+        ->where('LINEA_DOC_INV', $request->linea)
+        ->delete();
+      \DB::commit();
+      return response()->json('lineDroped');
+
+    } catch (\Exception $e) {
+      switch ($e->getCode()) {
+        default:
+          \DB::rollback();
+          \Log::info($e);
+          abort(500);
+          break;
+      }
+    }
   }
 
   /**
    * Find by Barcode
    */
-    public function lookupBybarcode(Request $request) {
-      return Articulos::where('CODIGO_BARRAS_VENT', $request->barcode)->get();
-      //return Articulo::where('CODIGO_BARRAS_VENT', $barcode)->first();
+  public function lookupBybarcode(Request $request) {
+    return Articulos::where('CODIGO_BARRAS_INVT', $request->barcode)
+      ->whereNotNull('CODIGO_BARRAS_INVT')
+      ->where('CODIGO_BARRAS_INVT', '!=', '')
+      ->get();
   }
 }
