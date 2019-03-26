@@ -23,6 +23,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::resource('articulos', 'Api\ArticulosController');
 Route::get('search/articulos', 'Api\ArticulosController@customSearch')
   ->name('articulos.search');
+Route::get('search/articuloscodigo','Api\ArticulosController@customSearchWithBarcode')
+  ->name('articulos.search');
 Route::get('buscar', 'Api\OutPutsController@lookupBybarcode');
 
 /**
@@ -58,3 +60,9 @@ Route::get('localizacion/{bodega}',
  */
 Route::get('bodega', 'Api\BodegaController@index');
 Route::get('bodega/{bodega}', 'Api\BodegaController@getStorage');
+
+/**
+ * Routes for Stocks levels of an item
+ */
+ // Get lote stock for the given item as parameter
+Route::get('stocck/lote', 'Api\ArticulosController@loteStockLevel');

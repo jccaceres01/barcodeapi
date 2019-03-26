@@ -107,16 +107,23 @@ class OutputsController extends Controller
       'COSTO_TOTAL_DOLAR_COMP' => 0
     ];
 
+    $existenciaLote = null;
+    $existenciaBodega = null;
+    // $existenciaReserva = null;
+
     // Find existencia lote
     $existenciaLote = \DB::table('SOCOCO.EXISTENCIA_LOTE')
       ->where('ARTICULO', $request->articulo)
       ->where('BODEGA', $request->bodega)
       ->where('LOCALIZACION', $request->localizacion)
       ->where('LOTE', 'ND')->first();
+    if ($existenciaLote == null) return response()->json('noExistsLote');
+
     //  Find existencia bodega
     $existenciaBodega = \DB::table('SOCOCO.EXISTENCIA_BODEGA')
       ->where('ARTICULO', $request->articulo)
       ->where('BODEGA', $request->bodega)->first();
+    if ($existenciaBodega == null) return response()->json('noExistsBodega');
 
     if ($request->cantidad <= $existenciaLote->CANT_DISPONIBLE) {
       \DB::beginTransaction();

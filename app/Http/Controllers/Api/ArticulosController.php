@@ -93,4 +93,25 @@ class ArticulosController extends Controller
       ->orWhere('ARTICULO', 'like', '%'.$request->criteria.'%')
       ->get();
   }
+  /**
+   * Search by Description or Barcode
+   */
+  public function customSearchWithBarcode(Request $request) {
+    return Articulos::where('DESCRIPCION', 'like', '%'.$request->criteria.'%')
+      ->orWhere('ARTICULO', 'like', '%'.$request->criteria.'%')
+      ->orWhere('CODIGO_BARRAS_VENT', 'like', '%'.$request->criteria.'%')
+      ->orWhere('CODIGO_BARRAS_INVT', 'like', '%'.$request->criteria.'%')
+      ->get();
+  }
+
+  /**
+   * Get the stock of a item in lote
+   */
+  public function loteStockLevel(Request $request) {
+    return $loteStockLevel = \DB::table('SOCOCO.EXISTENCIA_LOTE')
+      ->where('ARTICULO', $request->articulo)
+      ->orderBy('BODEGA', 'ASC')
+      ->orderBy('LOCALIZACION', 'ASC')
+      ->get();
+  }
 }
