@@ -64,5 +64,18 @@ Route::get('bodega/{bodega}', 'Api\BodegaController@getStorage');
 /**
  * Routes for Stocks levels of an item
  */
+
  // Get lote stock for the given item as parameter
 Route::get('stocck/lote', 'Api\ArticulosController@loteStockLevel');
+
+/**
+ * Routes for phisical inventory ticket
+ */
+Route::get('inventory/ticket',
+  'Api\PhisicalInventoryTicketController@index');
+Route::post('inventory/ticket',
+  'Api\PhisicalInventoryTicketController@store');
+Route::get('inventory/ticket/{inventory_ticket}',
+  'Api\PhisicalInventoryTicketController@show');
+Route::delete('inventory/ticket/{inventory_ticket}',
+  'Api\PhisicalInventoryTicketController@delete');
