@@ -27,7 +27,7 @@ class PhisicalInventoryTicketController extends Controller
         'BOLETA_INV_FISICO.SERIE_CADENA_DISP',
         'BOLETA_INV_FISICO.SERIE_CADENA_NOAPR',
         'BOLETA_INV_FISICO.SERIE_CADENA_VENC',
-        'ARTICULO.DESCRIPCION',
+        'ARTICULO.DESCRIPCION'
       )->join('SOCOCO.ARTICULO', 'SOCOCO.ARTICULO.ARTICULO', '=',
         'SOCOCO.BOLETA_INV_FISICO.ARTICULO')->get();
   }
