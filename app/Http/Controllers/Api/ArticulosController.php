@@ -15,7 +15,7 @@ class ArticulosController extends Controller
    */
   public function index()
   {
-    return Articulos::paginate(10);
+    return Articulos::paginate(2500);
   }
 
   /**

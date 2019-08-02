@@ -66,8 +66,21 @@ Route::get('bodega/{bodega}', 'Api\BodegaController@getStorage');
  */
 
  // Get lote stock for the given item as parameter
-Route::get('stocck/lote', 'Api\ArticulosController@loteStockLevel');
+Route::get('stock/lote', 'Api\ArticulosController@loteStockLevel');
 
+
+/**
+ * Routes for stock lote exists
+ */
+Route::get('lote', 'Api\ExistenciaLoteController@index')->name('lote.index');
+Route::post('lote', 'Api\ExistenciaLoteController@store')->name('lote.store');
+Route::get('lote/{bodega}/{articulo}/{localizacion}',
+  'Api\ExistenciaLoteController@show')->name('lote.show');
+Route::match(['put', 'patch'], 'lote/{bodega}/{articulo}/{localizacion}',
+  'Api\ExistenciaLoteController@update')->name('lote.update');
+Route::delete('lote/{bodega}/{articulo}/{localizacion}',
+  'Api\ExistenciaLoteController@destroy')->name('lote.destroy');
+  
 /**
  * Routes for phisical inventory ticket
  */
