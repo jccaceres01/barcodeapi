@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 
 class ExistenciaLoteController extends Controller
 {
@@ -12,11 +13,22 @@ class ExistenciaLoteController extends Controller
    *
    * @return \Illuminate\Http\Response
    */
-  public function index()
+  public function index(Request $request)
   {
     try {
-      return response()->json(\DB::table('SOCOCO.EXISTENCIA_LOTE')
-        ->paginate(3000));
+
+      return \DB::table('SOCOCO.EXISTENCIA_LOTE')
+      ->join('SOCOCO.ARTICULO', 'SOCOCO.EXISTENCIA_LOTE.ARTICULO', '=', 'SOCOCO.ARTICULO.ARTICULO')
+      ->select(
+        'SOCOCO.EXISTENCIA_LOTE.BODEGA',
+        'SOCOCO.EXISTENCIA_LOTE.ARTICULO',
+        'SOCOCO.ARTICULO.DESCRIPCION',
+        'SOCOCO.EXISTENCIA_LOTE.LOCALIZACION',
+        'SOCOCO.ARTICULO.CLASIFICACION_2',
+        'SOCOCO.EXISTENCIA_LOTE.CANT_DISPONIBLE',
+        'SOCOCO.EXISTENCIA_LOTE.CANT_RESERVADA'
+      )->get();
+
     } catch (\Exception $e) {
       switch ($e->getCode()) {
         default:

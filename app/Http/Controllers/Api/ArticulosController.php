@@ -15,7 +15,13 @@ class ArticulosController extends Controller
    */
   public function index()
   {
-    return Articulos::paginate(2500);
+    return Articulos::select(
+      'ARTICULO',
+      'DESCRIPCION',
+      'CLASIFICACION_2',
+      'CODIGO_BARRAS_VENT',
+      'CODIGO_BARRAS_INVT',
+    )->get();
   }
 
   /**
@@ -97,11 +103,37 @@ class ArticulosController extends Controller
    * Search by Description or Barcode
    */
   public function customSearchWithBarcode(Request $request) {
-    return Articulos::where('DESCRIPCION', 'like', '%'.$request->criteria.'%')
-      ->orWhere('ARTICULO', 'like', '%'.$request->criteria.'%')
-      ->orWhere('CODIGO_BARRAS_VENT', 'like', '%'.$request->criteria.'%')
-      ->orWhere('CODIGO_BARRAS_INVT', 'like', '%'.$request->criteria.'%')
-      ->get();
+
+    try {
+      return \DB::table('SOCOCO.EXISTENCIA_LOTE')
+        ->join('SOCOCO.ARTICULO', 'SOCOCO.EXISTENCIA_LOTE.ARTICULO',
+          '=', 'SOCOCO.ARTICULO.ARTICULO')
+        ->select(
+          'SOCOCO.EXISTENCIA_LOTE.BODEGA',
+          'SOCOCO.EXISTENCIA_LOTE.ARTICULO',
+          'SOCOCO.ARTICULO.DESCRIPCION',
+          'SOCOCO.EXISTENCIA_LOTE.LOCALIZACION',
+          'SOCOCO.ARTICULO.CLASIFICACION_2',
+          'SOCOCO.EXISTENCIA_LOTE.CANT_DISPONIBLE',
+          'SOCOCO.EXISTENCIA_LOTE.CANT_RESERVADA',
+          'SOCOCO.ARTICULO.CODIGO_BARRAS_VENT',
+          'SOCOCO.ARTICULO.CODIGO_BARRAS_INVT',
+        )->where('ARTICULO.DESCRIPCION', 'like',
+          '%'.$request->criteria.'%')
+        ->orWhere('EXISTENCIA_LOTE.ARTICULO', 'like',
+          '%'.$request->criteria.'%')
+        ->orWhere('ARTICULO.CODIGO_BARRAS_VENT', 'like',
+          '%'.$request->criteria.'%')
+        ->orWhere('ARTICULO.CODIGO_BARRAS_INVT', 'like',
+          '%'.$request->criteria.'%')
+        ->get();
+    } catch (\Exception $e) {
+      switch ($e->getCode()) {
+        default:
+          info($e);
+          abort(500);
+      }
+    }
   }
 
   /**

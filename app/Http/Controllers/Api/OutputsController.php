@@ -51,8 +51,13 @@ class OutputsController extends Controller
         ]);
 
       \DB::table('SOCOCO.DOCUMENTO_INV')->insert($data);
+      // Get the new output
+      $output = \DB::table('SOCOCO.DOCUMENTO_INV')
+        ->where('DOCUMENTO_INV', 'SAL-'.$cons)
+        ->get();
+
       \DB::commit();
-      return response()->json(true);
+      return response()->json($output, 200);
     } catch (\Exception $e) {
       \DB::rollback();
       \Log::info($e);
