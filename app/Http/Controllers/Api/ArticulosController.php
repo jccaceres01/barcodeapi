@@ -20,7 +20,7 @@ class ArticulosController extends Controller
       'DESCRIPCION',
       'CLASIFICACION_2',
       'CODIGO_BARRAS_VENT',
-      'CODIGO_BARRAS_INVT',
+      'CODIGO_BARRAS_INVT'
     )->get();
   }
 
