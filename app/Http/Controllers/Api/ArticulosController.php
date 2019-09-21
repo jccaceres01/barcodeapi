@@ -117,7 +117,7 @@ class ArticulosController extends Controller
           'SOCOCO.EXISTENCIA_LOTE.CANT_DISPONIBLE',
           'SOCOCO.EXISTENCIA_LOTE.CANT_RESERVADA',
           'SOCOCO.ARTICULO.CODIGO_BARRAS_VENT',
-          'SOCOCO.ARTICULO.CODIGO_BARRAS_INVT',
+          'SOCOCO.ARTICULO.CODIGO_BARRAS_INVT'
         )->where('ARTICULO.DESCRIPCION', 'like',
           '%'.$request->criteria.'%')
         ->orWhere('EXISTENCIA_LOTE.ARTICULO', 'like',
