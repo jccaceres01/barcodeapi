@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Articulos;
+use App\Models\Articulos;
 
 class ArticulosController extends Controller
 {
@@ -64,7 +64,7 @@ class ArticulosController extends Controller
    */
   public function edit($id)
   {
-
+    
   }
 
   /**

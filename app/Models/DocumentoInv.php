@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +11,6 @@ class DocumentoInv extends Model
   public $incrementing = false;
   protected $keyType = 'varchar';
   public $timestamps = false;
-  protected $primaryKey = ;
 
   protected $fillable = [
     'ARTICULO',

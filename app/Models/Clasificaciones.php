@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,6 +8,6 @@ class Clasificaciones extends Model
 {
   protected $table = 'SOCOCO.CLASIFICACION';
   public $incrementing = false;
-  public $keyType = 'varchar';
-  protected $primary = 'CLASIFICACION';
+  protected $keyType = 'varchar';
+  protected $primaryKey = 'CLASIFICACION';
 }
