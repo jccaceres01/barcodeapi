@@ -44,7 +44,7 @@ class PhisicalInventoryTicketController extends Controller
    * Create new phisical Inventory ticket
    */
   public function store(Request $request) {
-
+    info($request->all());
     if (count(\DB::table('SOCOCO.BOLETA_INV_FISICO')
         ->where('ARTICULO', $request->articulo)
         ->where('BODEGA', $request->bodega)
@@ -53,12 +53,16 @@ class PhisicalInventoryTicketController extends Controller
 
       return response()->json('exists');
     } else {
-      // last ticket in sequence
-      $lastTicket = \DB::table('SOCOCO.BOLETA_INV_FISICO')
-        ->orderBy('BOLETA', 'DESC')->first()->BOLETA + 1;
+      // last ticket number in sequence
+      $lastTicketNumber = 1;
 
-      // Compute the next ticket in sequence
-      $nextTicket = str_pad($lastTicket, 8, '0', STR_PAD_LEFT);
+      if (\DB::table('SOCOCO.BOLETA_INV_FISICO')->count() > 0) {
+          $lastTicketNumber = \DB::table('SOCOCO.BOLETA_INV_FISICO')
+            ->orderBy('BOLETA', 'DESC')->first()->BOLETA + 1;
+      }
+      
+      // Format the next ticket number in sequence
+      $nextTicket = str_pad($lastTicketNumber, 8, '0', STR_PAD_LEFT);
 
       // Data to insert
       $data = [
